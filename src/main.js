@@ -11,9 +11,11 @@ const form = document.querySelector(".search-form");
 
 form.addEventListener("submit", handlerSearch);
 
+const loader = document.querySelector(".loader");
+
 
 function fetchGallery(q) {
-  showLoader();
+  loader.style.display = "block"; 
   return fetch(`${url}?key=${key}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true`)
     .then((res) => {
       if (!res.ok) {
@@ -22,7 +24,7 @@ function fetchGallery(q) {
       return res.json();
     })
     .finally(() => {
-      hideLoader();
+        loader.style.display = "none"; 
     });
 }
 
@@ -79,7 +81,7 @@ function renderCard(img) {
 
 function onFetchError(error) {
   iziToast.error({
-    message: 'Sorry, there are no images matching your search query.Please try again!',
+    message: 'Sorry, there are no images matching your search query. Please try again!',
     messageColor: '#fff',
     messageSize: '16px',
     messageLineHeight: '1.5',
@@ -90,14 +92,4 @@ function onFetchError(error) {
     progressBarColor: '#b51b1b',
    
 });
-}
-const loader = document.querySelector(".loader");
-
-
-function showLoader() {
-  loader.style.display = "block"; 
-}
-
-function hideLoader() {
-  loader.style.display = "none"; 
 }
