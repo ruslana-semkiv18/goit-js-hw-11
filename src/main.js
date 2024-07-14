@@ -13,12 +13,16 @@ form.addEventListener("submit", handlerSearch);
 
 
 function fetchGallery(q) {
+  showLoader();
   return fetch(`${url}?key=${key}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true`)
     .then((res) => {
       if (!res.ok) {
         throw new Error(res.status);
       }
       return res.json();
+    })
+    .finally(() => {
+      hideLoader();
     });
 }
 
@@ -28,10 +32,20 @@ function handlerSearch(evt) {
   evt.preventDefault();
 
   const form = evt.currentTarget;
-  const queryValue = form.elements.query.value.toLowerCase(); 
+  const queryValue = form.elements.query.value.trim().toLowerCase(); 
+  if (!queryValue) {
+    return;
+  }
+
+  containerCard.innerHTML = '';
 
   fetchGallery(queryValue) 
-    .then(data=>renderCard(data.hits)) 
+    .then(data => {
+       if (data.hits.length === 0) {
+        throw new Error();
+    }
+     renderCard(data.hits)
+    }) 
     .catch(onFetchError) 
     .finally(() => form.reset()); 
 }
@@ -53,11 +67,37 @@ function renderCard(img) {
          </ul>
        </div>
       </div>`).join("");
-}
+  
+  const lightbox = new SimpleLightbox('.card-img a', {
+    captions: true,
+    captionsData: "alt",
+    captionPosition: "bottom",
+    captionDelay: 250,
+  });
+  lightbox.refresh();
+ }
 
 function onFetchError(error) {
   iziToast.error({
-    title: 'Error',
-    message: 'Illegal operation',
+    message: 'Sorry, there are no images matching your search query.Please try again!',
+    messageColor: '#fff',
+    messageSize: '16px',
+    messageLineHeight: '1.5',
+    messageFontWeight: '400',
+    backgroundColor: '#ef4040',
+    close: true,
+    position: 'topRight',            
+    progressBarColor: '#b51b1b',
+   
 });
+}
+const loader = document.querySelector(".loader");
+
+
+function showLoader() {
+  loader.style.display = "block"; 
+}
+
+function hideLoader() {
+  loader.style.display = "none"; 
 }
